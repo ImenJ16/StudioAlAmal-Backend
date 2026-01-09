@@ -125,12 +125,6 @@ Building this project taught me:
 - Separation of concerns in backend development
 
 
-
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
 ## 🙏 Acknowledgments
 
 Built for **Studio Al Amal**, a photography studio in Tunisia specializing in weddings, portraits, and events.
