@@ -143,3 +143,4 @@ Built for **Studio Al Amal**, a photography studio in Tunisia specializing in we
 💼 **Open to job opportunities** in full-stack development 
 ```
 
+*I LOVE MY JOB !*
