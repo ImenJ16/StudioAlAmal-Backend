@@ -46,7 +46,8 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
-
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ContentDbContext>();
 var app = builder.Build();
 
 // Configure pipeline
@@ -61,5 +62,6 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

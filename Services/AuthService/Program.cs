@@ -51,6 +51,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add Health Checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ApplicationDbContext>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -66,5 +70,10 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
+// Map health check endpoints
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
 app.Run();

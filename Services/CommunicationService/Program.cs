@@ -46,8 +46,39 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<CommunicationDbContext>();
+
+Console.WriteLine("ASPNETCORE_ENVIRONMENT = " + builder.Environment.EnvironmentName);
+Console.WriteLine("Connection string: " + builder.Configuration.GetConnectionString("DefaultConnection"));
+
+
+
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<CommunicationDbContext>();
+
+    // Check CanConnect
+    Console.WriteLine("CanConnect? " + db.Database.CanConnect());
+
+    // More detailed test
+    try
+    {
+        var result = db.Database.ExecuteSqlRaw("SELECT 1");
+        Console.WriteLine("ExecuteSqlRaw result: " + result);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("DB Exception: " + ex);
+    }
+}
+
+
+
+
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
@@ -61,5 +92,6 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
