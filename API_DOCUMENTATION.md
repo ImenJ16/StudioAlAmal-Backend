@@ -24,7 +24,7 @@ Base URL: http://localhost:5001
 
 POST /api/Auth/register
 Create a new admin user account.
-Authentication Required: ❌ No
+Authentication Required:  No
 Request Body:
 json{
   "username": "string (3-50 characters, required)",
@@ -992,3 +992,67 @@ Photos
 Videos
 AboutUs
 ContactSubmissions
+
+
+****
+
+
+Environment Configuration & HTTPS Setup
+1. Use Environment Variables for Sensitive Data
+
+What we did: Removed secrets (JWT keys, database connection strings) from appsettings.json and stored them securely using User Secrets (for development) and Environment Variables (for production).
+
+Why: Keeps sensitive information out of source control and reduces security risks.
+
+Production config: appsettings.Production.json contains only non-sensitive settings; secrets are supplied via environment variables at runtime.
+
+2. Add HTTPS Support
+
+What we did:
+
+Installed a trusted development HTTPS certificate (dotnet dev-certs https --trust).
+
+Updated launchSettings.json for each service (AuthService, ContentService, CommunicationService) to include an HTTPS profile with dedicated HTTPS ports (7001–7003).
+
+Why: Enables secure communication during local development, ensures features relying on HTTPS (e.g., secure cookies, JWT validation) behave correctly, and mirrors production behavior.
+
+3. Running the Services
+
+To run a service with HTTPS locally, use the HTTPS launch profile:
+
+dotnet run --launch-profile https
+
+
+Swagger UI can then be accessed securely via the HTTPS URL.
+
+****
+
+Global Error Handling
+
+What we did:
+
+Created a GlobalExceptionMiddleware for all three services (AuthService, ContentService, CommunicationService).
+
+This middleware catches unhandled exceptions in the pipeline, logs them, and returns a consistent JSON error response.
+
+Registered the middleware in Program.cs before authentication/authorization.
+
+Why we did it:
+
+Centralized error handling → developers don’t need to wrap every controller action in try/catch.
+
+Consistent API responses → clients always receive JSON with a message and optional details (shown only in development).
+
+Better logging → all unhandled exceptions are logged automatically for easier debugging and monitoring.
+
+Security → sensitive exception details are hidden in production environments, preventing accidental data leaks.
+
+Example response:
+
+{
+  "message": "An error occurred while processing your request",
+  "details": "Optional detailed exception message in development"
+}
+
+
+This ensures a clean, predictable API behavior and makes debugging much easier during development.

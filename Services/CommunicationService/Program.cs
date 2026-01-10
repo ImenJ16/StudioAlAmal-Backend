@@ -1,8 +1,9 @@
-using Microsoft.EntityFrameworkCore;
+using AuthService.Middleware;
+using CommunicationService.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using CommunicationService.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseCors("AllowAll");
 app.UseAuthentication();
