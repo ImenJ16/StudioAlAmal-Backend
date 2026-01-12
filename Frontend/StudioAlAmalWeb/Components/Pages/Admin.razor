@@ -1,0 +1,108 @@
+﻿@page "/admin"
+@using StudioAlAmalWeb.Models
+@using StudioAlAmalWeb.Services
+@inject AuthService AuthService
+@inject ContentService ContentService
+@inject CommunicationService CommunicationService
+@inject NavigationManager Navigation
+
+<PageTitle>Admin Dashboard - Studio Al Amal</PageTitle>
+
+@if (!isAuthenticated)
+{
+    <p>Redirecting to login...</p>
+}
+else
+{
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Admin Dashboard</h1>
+            <button class="btn btn-danger" @onclick="HandleLogout">Logout</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+            <button class="@(activeTab == "promos" ? "active" : "")"
+                    @onclick="@(() => activeTab = "promos")">
+                Promos
+            </button>
+
+            <button class="@(activeTab == "photos" ? "active" : "")"
+                    @onclick="@(() => activeTab = "photos")">
+                Photos
+            </button>
+
+            <button class="@(activeTab == "videos" ? "active" : "")"
+                    @onclick="@(() => activeTab = "videos")">
+                Videos
+            </button>
+
+            <button class="@(activeTab == "about" ? "active" : "")"
+                    @onclick="@(() => activeTab = "about")">
+                About Us
+            </button>
+
+            <button class="@(activeTab == "messages" ? "active" : "")"
+                    @onclick="@(() => activeTab = "messages")">
+                Messages (@unreadCount)
+            </button>
+        </div>
+
+
+
+        <!-- Content -->
+        <div class="admin-content">
+            @if (activeTab == "promos")
+            {
+                <PromoManagement />
+            }
+            else if (activeTab == "photos")
+            {
+                <PhotoManagement />
+            }
+            else if (activeTab == "videos")
+            {
+                <VideoManagement />
+            }
+            else if (activeTab == "about")
+            {
+                <AboutUsManagement />
+            }
+            else if (activeTab == "messages")
+            {
+                <MessageManagement />
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private bool isAuthenticated = false;
+    private string activeTab = "promos";
+    private int unreadCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        
+        if (!isAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        await LoadUnreadCountAsync();
+    }
+
+    private async Task LoadUnreadCountAsync()
+    {
+        var messages = await CommunicationService.GetContactSubmissionsAsync(unreadOnly: true);
+        unreadCount = messages.Count;
+    }
+
+    private async Task HandleLogout()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login");
+    }
+}

@@ -1,0 +1,140 @@
+﻿@page "/"
+@using StudioAlAmalWeb.Models
+@using StudioAlAmalWeb.Services
+@inject ContentService ContentService
+@inject NavigationManager Navigation
+
+<PageTitle>Studio Al Amal - Photography Studio in Tunisia</PageTitle>
+
+<div class="home-container">
+    <!-- Hero Section with Promos Carousel -->
+    <section class="hero-section">
+        <div class="carousel">
+            @if (promos.Any())
+            {
+                @foreach (var promo in promos.Take(1))
+                {
+                    <div class="carousel-item active">
+                        <img src="@promo.ImageUrl" alt="@promo.Title" />
+                        <div class="carousel-caption">
+                            <h1>@promo.Title</h1>
+                            <p>@promo.Description</p>
+                            <a href="/contact" class="btn btn-primary">Book Now</a>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="carousel-item active">
+                    <div class="placeholder-hero">
+                        <h1>Welcome to Studio Al Amal</h1>
+                        <p>Professional Photography Services in Tunisia</p>
+                        <a href="/contact" class="btn btn-primary">Contact Us</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="portfolio-section">
+        <div class="container">
+            <h2>Our Work</h2>
+            <div class="photo-grid">
+                @if (photos.Any())
+                {
+                    @foreach (var photo in photos.Take(6))
+                    {
+                        <div class="photo-card">
+                            <img src="@(photo.ThumbnailUrl ?? photo.ImageUrl)" alt="@photo.Title" />
+                            <div class="photo-overlay">
+                                <h3>@photo.Title</h3>
+                                <p>@photo.Category</p>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>No photos available yet.</p>
+                }
+            </div>
+            <a href="/gallery" class="btn btn-secondary">View Full Gallery</a>
+        </div>
+    </section>
+
+    <!-- Videos Section -->
+    <section class="videos-section">
+        <div class="container">
+            <h2>Video Highlights</h2>
+            <div class="video-grid">
+                @if (videos.Any())
+                {
+                    @foreach (var video in videos.Take(3))
+                    {
+                        <div class="video-card">
+                            <img src="@video.ThumbnailUrl" alt="@video.Title" />
+                            <h3>@video.Title</h3>
+                            <p>@video.Description</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>No videos available yet.</p>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section">
+        <div class="container">
+            <h2>About Us</h2>
+            @if (aboutUs != null)
+            {
+                <div class="about-content">
+                    @if (!string.IsNullOrEmpty(aboutUs.ImageUrl))
+                    {
+                        <img src="@aboutUs.ImageUrl" alt="Studio Al Amal" />
+                    }
+                    <p>@aboutUs.Content</p>
+                </div>
+            }
+            else
+            {
+                <p>Welcome to Studio Al Amal, your premier photography studio in Tunisia.</p>
+            }
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Capture Your Moments?</h2>
+            <p>Contact us today to discuss your photography needs</p>
+            <a href="/contact" class="btn btn-primary btn-lg">Get in Touch</a>
+        </div>
+    </section>
+</div>
+
+@code {
+    private List<Promo> promos = new();
+    private List<Photo> photos = new();
+    private List<Video> videos = new();
+    private AboutUs? aboutUs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        promos = await ContentService.GetPromosAsync(activeOnly: true);
+        photos = await ContentService.GetPhotosAsync(activeOnly: true);
+        videos = await ContentService.GetVideosAsync(activeOnly: true);
+        aboutUs = await ContentService.GetAboutUsAsync();
+    }
+}
