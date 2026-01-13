@@ -4,10 +4,13 @@ using CommunicationService.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Threading.RateLimiting;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +25,8 @@ builder.Services.AddSwaggerGen();
 // Add Database Context
 builder.Services.AddDbContext<CommunicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
 
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -53,8 +58,12 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+
+
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<CommunicationDbContext>();
+
+
 
 Console.WriteLine("ASPNETCORE_ENVIRONMENT = " + builder.Environment.EnvironmentName);
 Console.WriteLine("Connection string: " + builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -76,6 +85,13 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<CommunicationDbContext>();
+    Console.WriteLine("EF Core CanConnect? " + db.Database.CanConnect());
+}
+
 
 using (var scope = app.Services.CreateScope())
 {

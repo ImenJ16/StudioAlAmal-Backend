@@ -1,13 +1,14 @@
 using AuthService.Data;
 using AuthService.Middleware;
 using AuthService.Services;
+using AuthService.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using AuthService.Validators;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -112,4 +113,17 @@ app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.Health
 {
     Predicate = check => check.Tags.Contains("ready")
 });
+
+try
+{
+    var testConn = new SqlConnection(@"Server=(localdb)\MSSQLLocalDB;Database=StudioAlAmalDB;Trusted_Connection=True;");
+    testConn.Open();
+    Console.WriteLine("? Connected to StudioAlAmalDB!");
+    testConn.Close();
+}
+catch (Exception ex)
+{
+    Console.WriteLine("? Connection failed: " + ex.Message);
+}
+
 app.Run();
